@@ -16,7 +16,13 @@ export default async function AccountPage() {
         <h1 className="font-display text-5xl text-ink">Profile</h1>
         <p className="mt-2 text-ink-soft">This is the name friends will see on a plan you host.</p>
       </header>
-      <StartForm mode="edit" initialName={user.displayName} initialTimezone={user.timezone} />
+      <StartForm
+        mode="edit"
+        initialName={user.displayName}
+        initialTimezone={user.timezone}
+        initialRegion={user.homeRegion}
+        initialInterests={user.interests}
+      />
       <LogoutButton />
     </main>
   );

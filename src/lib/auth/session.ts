@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { createMemberRecord, readUserByToken, revokeSession, updateProfile, type PublicUser } from "@/lib/auth/users";
 import type { KindleDb } from "@/lib/db/client";
-import type { ProfileInput } from "@/lib/validators/profile";
 
 export const SESSION_COOKIE = "kindle_session";
 const THIRTY_DAYS_SECONDS = 60 * 60 * 24 * 30;
@@ -36,7 +35,7 @@ export async function clearSessionCookie(db: KindleDb) {
   });
 }
 
-export async function saveProfile(db: KindleDb, input: ProfileInput, secure: boolean) {
+export async function saveProfile(db: KindleDb, input: unknown, secure: boolean) {
   const existing = await readSessionUser(db);
   if (!existing) {
     const created = createMemberRecord(db, input);

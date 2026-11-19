@@ -7,6 +7,8 @@ import { createMemberRecord, readUserByToken, revokeSession, updateProfile } fro
 const profile = {
   displayName: "Avery Chen",
   timezone: "America/Chicago",
+  homeRegion: "Lincoln Park",
+  interests: ["basketball"],
   ageAttested: true,
 };
 

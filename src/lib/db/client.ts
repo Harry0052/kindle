@@ -1,12 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import Database from "better-sqlite3";
+import type BetterSqlite from "better-sqlite3";
 import { drizzle, type BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import * as schema from "./schema";
 import { migrate } from "./migrate";
 import { seedDemo } from "./seed";
 
-export type KindleDb = BetterSQLite3Database<typeof schema>;
+export type KindleDb = BetterSQLite3Database<typeof schema> & { $client: BetterSqlite.Database };
 
 const globalForDb = globalThis as unknown as { kindleSqlite?: Database.Database };
 

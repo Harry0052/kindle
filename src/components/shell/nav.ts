@@ -9,5 +9,10 @@ export type NavItem = {
 export function navFor(signedIn: boolean): NavItem[] {
   const tonight: NavItem = { href: "/", label: "Tonight", icon: "tonight" };
   if (!signedIn) return [tonight];
-  return [tonight];
+  return [
+    tonight,
+    { href: "/plans", label: "Plans", icon: "plans" },
+    { href: "/create", label: "Create", icon: "create" },
+    { href: "/friends", label: "Friends", icon: "friends" },
+  ];
 }

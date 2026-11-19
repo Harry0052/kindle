@@ -24,6 +24,6 @@ npm run test:e2e
 
 ## What is real right now
 
-Stage 1 stores a profile and shows Tonight. Friend plans, RSVP, chat, and safety actions are not on screen yet. See `STATUS.md`.
+You can save a profile, create a friends-only plan, add a friend with a link they accept, and RSVP. A full plan waitlists the next person and says a spot is not held. The exact spot is shown to the host and to people who are in. Plan comments, time-change notices, and block or report are not available yet. See `STATUS.md`.
 
-The example poster on the signed-out page is not saved and does not invite anyone. Demo rows in the database, if present, are marked `kind` = `demo` and are not your profile.
+The example poster on the signed-out page is not saved and does not invite anyone. Demo rows are marked `kind` = `demo` and are not your friends.

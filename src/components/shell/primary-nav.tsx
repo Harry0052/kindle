@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarPlus, House, Users, type LucideIcon } from "lucide-react";
+import { CalendarDays, House, Plus, Users, type LucideIcon } from "lucide-react";
 import type { NavIcon, NavItem } from "./nav";
 
 const icons: Record<NavIcon, LucideIcon> = {
   tonight: House,
-  plans: CalendarPlus,
-  create: CalendarPlus,
+  plans: CalendarDays,
+  create: Plus,
   friends: Users,
 };
 

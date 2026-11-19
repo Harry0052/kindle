@@ -2,7 +2,43 @@
 
 Working name: **Kindle**. This is not the Amazon product and does not use that branding. The build brief called the product GATHER. The owner renamed it Kindle.
 
-Current stage: **1 — profile foundation is in place. Friend plans are not built yet.**
+Current stage: **3 — RSVP, capacity, and exact-spot reveal work. Plan comments and safety tools are next.**
+
+## Stage 3 report
+
+```text
+PRODUCT: Kindle (brief name GATHER)
+STAGE: 3
+STATUS: PASS
+USER-FACING WORKING FLOWS: A friend can tap I'm in or Can't go. The host already uses one spot. When the plan is full, another I'm in becomes a waitlist and the screen says a spot is not held. The exact spot appears only for the host and people who are in. Refresh keeps the RSVP. A second tap of I'm in does not take another spot.
+UI/UX: The plan page shows spots as "N of M in", a roster of people who are in, and the hidden-spot state before RSVP. Playwright completes signup, publish, a stranger denial, a friend accept, and the reveal after I'm in.
+DATA + SECURITY: rsvps table and activities.going_count. The last spot is claimed with UPDATE ... WHERE going_count < capacity inside an immediate transaction. Two overlapping writers were tested with worker threads; only one increment succeeded. Waitlist does not reveal the exact spot.
+TESTS: npm test -> 17 passed, including the capacity and concurrency tests. npm run lint -> pass. npm run typecheck -> pass. npm run build -> pass. CI=true npx playwright test --retries=0 -> 5 passed.
+REAL INTEGRATIONS: local SQLite | SANDBOX: none | DISABLED: contacts, GPS, maps, venues, email, SMS, push, identity verification, payments
+FILES CHANGED: RSVP service, capacity SQL, plan controls, migration 0003.
+OPEN BUGS/RISKS: A hidden plan's document can still be HTTP 200 while the body is the not-found screen and omits the plan. Waitlist is not auto-promoted when a spot opens. No email is sent when someone joins.
+NEXT STAGE PROPOSAL: In-plan comments for people who are in, a host time change that writes an in-app notice, and Tonight dropping plans whose start time has passed.
+AWAITING APPROVAL: NO — the owner pre-approved every stage for this build.
+```
+
+
+## Stage 2 report
+
+```text
+PRODUCT: Kindle (brief name GATHER)
+STAGE: 2
+STATUS: PASS
+USER-FACING WORKING FLOWS: Onboarding now stores a home area and interests. A person can publish or draft a plan with a local time, a public area, and a private exact spot. Friends are added only by an invite link the other person accepts. A stranger gets the not-found screen and the response does not include the title, area, or exact spot. A friend sees the area and the time in their timezone, and the exact spot stays hidden. Demo Jordan and Demo Sam stay labeled demo and are not shown to a real profile.
+UI/UX: Playwright covered the landing at 390px and 1440px, and the create-to-plan flow in Chromium. Interest choices are visible checkboxes with large targets. No map, contact import, or send button is offered.
+DATA + SECURITY: Added home_region, user_interests, friend_invites (token hash only), friend_edges, and activities. Drafts are host-only. Published plans require an accepted friend edge. Exact location is omitted unless the viewer is the host. Street-like public areas are rejected. Writes are same-origin and rate-limited.
+TESTS: npm test -> 15 passed. npm run lint -> pass. npm run typecheck -> pass. npm run build -> pass. CI=true npx playwright test --retries=0 -> foundation 4 passed, plans privacy flow passed.
+REAL INTEGRATIONS: local SQLite, in-app invite links | SANDBOX: none | DISABLED: contacts, GPS, maps, venues, email, SMS, push, identity verification, payments
+FILES CHANGED: friend and activity services, Tonight, Create, Plans, Friends, invite page, migration 0002.
+OPEN BUGS/RISKS: The not-found document for a hidden plan can arrive with HTTP 200 while the rendered result is the not-found screen and the body omits the plan. RSVP does not exist yet, so a friend cannot become "in". No CSP hashes. SQLite is single-server.
+NEXT STAGE PROPOSAL: RSVP going, decline, and waitlist, with capacity enforced by a conditional update and the exact spot shown only to people who are in.
+AWAITING APPROVAL: NO — the owner pre-approved every stage for this build.
+```
+
 
 ## Stage 1 report
 

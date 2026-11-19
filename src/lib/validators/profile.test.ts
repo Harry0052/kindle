@@ -6,6 +6,8 @@ describe("profileSchema", () => {
     const parsed = profileSchema.safeParse({
       displayName: "Avery Chen",
       timezone: "America/Chicago",
+      homeRegion: "Lincoln Park",
+      interests: ["basketball"],
       ageAttested: true,
     });
     expect(parsed.success).toBe(true);
@@ -15,6 +17,8 @@ describe("profileSchema", () => {
     const parsed = profileSchema.safeParse({
       displayName: "avery@example.com",
       timezone: "Not/AZone",
+      homeRegion: "12 Main Street",
+      interests: [],
       ageAttested: false,
     });
     expect(parsed.success).toBe(false);
@@ -22,6 +26,8 @@ describe("profileSchema", () => {
       const fields = parsed.error.issues.map((issue) => String(issue.path[0]));
       expect(fields).toContain("displayName");
       expect(fields).toContain("timezone");
+      expect(fields).toContain("homeRegion");
+      expect(fields).toContain("interests");
       expect(fields).toContain("ageAttested");
     }
   });

@@ -7,8 +7,11 @@ test("a new profile is saved and still there after refresh", async ({ page }) =>
   await expect(page.getByRole("link", { name: /join|i'm in/i })).toHaveCount(0);
   await page.getByLabel("Name").fill("Avery Chen");
   await page.getByLabel("Timezone").selectOption("America/Chicago");
+  await page.getByLabel("Your area").fill("Lincoln Park");
+  await page.getByRole("checkbox", { name: "basketball" }).check();
   await page.getByRole("checkbox", { name: /18 or older/i }).check();
   await page.getByRole("button", { name: "Save and see tonight" }).click();
+  await page.waitForURL("/");
   await expect(page.getByRole("heading", { name: "Tonight" })).toBeVisible();
   await expect(page.getByText("Avery Chen").first()).toBeVisible();
   await page.reload();
@@ -19,6 +22,8 @@ test("a new profile is saved and still there after refresh", async ({ page }) =>
 test("a too-short name is rejected and the profile is not created", async ({ page }) => {
   await page.goto("/");
   await page.getByLabel("Name").fill("A");
+  await page.getByLabel("Your area").fill("Lincoln Park");
+  await page.getByRole("checkbox", { name: "basketball" }).check();
   await page.getByRole("checkbox", { name: /18 or older/i }).check();
   await page.getByRole("button", { name: "Save and see tonight" }).click();
   await expect(page.getByText(/at least 2 characters/i)).toBeVisible();

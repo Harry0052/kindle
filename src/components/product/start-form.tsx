@@ -1,29 +1,38 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Field, inputClass } from "@/components/ui/field";
 import { COMMON_TIME_ZONES } from "@/lib/time";
+import { INTERESTS } from "@/lib/validators/profile";
 
 type Fields = {
   displayName?: string;
   timezone?: string;
+  homeRegion?: string;
+  interests?: string;
   ageAttested?: string;
 };
 
 export function StartForm({
   mode,
+  nextPath = "/",
   initialName = "",
   initialTimezone = "UTC",
+  initialRegion = "",
+  initialInterests = [],
 }: {
   mode: "create" | "edit";
+  nextPath?: string;
   initialName?: string;
   initialTimezone?: string;
+  initialRegion?: string;
+  initialInterests?: string[];
 }) {
-  const router = useRouter();
   const [displayName, setDisplayName] = useState(initialName);
   const [timezone, setTimezone] = useState(initialTimezone);
+  const [homeRegion, setHomeRegion] = useState(initialRegion);
+  const [interests, setInterests] = useState<string[]>(initialInterests);
   const [ageAttested, setAgeAttested] = useState(mode === "edit");
   const [zones, setZones] = useState<string[]>(() => uniqueZones(initialTimezone));
   const [errors, setErrors] = useState<Fields>({});
@@ -45,12 +54,16 @@ export function StartForm({
       setErrors({ ageAttested: "Confirm that you are 18 or older to use Kindle." });
       return;
     }
+    if (interests.length === 0) {
+      setErrors({ interests: "Pick at least one interest." });
+      return;
+    }
     setPending(true);
     try {
       const response = await fetch("/api/session", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ displayName, timezone, ageAttested: true }),
+        body: JSON.stringify({ displayName, timezone, homeRegion, interests, ageAttested: true }),
       });
       const payload = (await response.json().catch(() => null)) as {
         error?: { message?: string; fields?: Fields };
@@ -60,8 +73,7 @@ export function StartForm({
         setFormError(payload?.error?.message ?? "Kindle could not save that profile.");
         return;
       }
-      router.push("/");
-      router.refresh();
+      window.location.assign(new URL(nextPath, window.location.origin).toString());
     } catch {
       setFormError("Kindle could not reach the server. Nothing was saved.");
     } finally {
@@ -103,6 +115,45 @@ export function StartForm({
           ))}
         </select>
       </Field>
+      <Field label="Your area" name="homeRegion" error={errors.homeRegion} hint="City, neighborhood, or campus. Not a street address.">
+        <input
+          id="homeRegion"
+          name="homeRegion"
+          className={inputClass}
+          required
+          maxLength={60}
+          value={homeRegion}
+          aria-invalid={errors.homeRegion ? true : undefined}
+          aria-describedby={errors.homeRegion ? "homeRegion-error" : "homeRegion-hint"}
+          onChange={(event) => setHomeRegion(event.target.value)}
+        />
+      </Field>
+      <fieldset className="grid gap-2">
+        <legend className="text-sm font-bold text-ink">Interests</legend>
+        <div className="flex flex-wrap gap-2">
+          {INTERESTS.map((interest) => {
+            const checked = interests.includes(interest);
+            return (
+              <label key={interest} className={`inline-flex min-h-12 items-center gap-2 rounded-full border px-4 text-sm font-semibold capitalize ${checked ? "border-ink bg-ink text-white" : "border-line bg-white"}`}>
+                <input
+                  type="checkbox"
+                  className="size-5 accent-sunset-deep"
+                  checked={checked}
+                  onChange={() =>
+                    setInterests((current) => (current.includes(interest) ? current.filter((item) => item !== interest) : [...current, interest]))
+                  }
+                />
+                {interest}
+              </label>
+            );
+          })}
+        </div>
+        {errors.interests ? (
+          <p id="interests-error" className="text-sm font-semibold text-clay">
+            {errors.interests}
+          </p>
+        ) : null}
+      </fieldset>
       <div className="grid gap-2">
         <label className="flex min-h-12 items-start gap-3 text-sm font-semibold text-ink">
           <input

@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 export function LogoutButton() {
-  const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,8 +21,7 @@ export function LogoutButton() {
               setError("Kindle could not log you out.");
               return;
             }
-            router.push("/");
-            router.refresh();
+            window.location.assign(new URL("/", window.location.origin).toString());
           } catch {
             setError("Kindle could not reach the server. You are still signed in.");
           } finally {

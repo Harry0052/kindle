@@ -33,6 +33,13 @@ export function clientIp(request: Request) {
   return "local";
 }
 
+export function publicOrigin(request: Request) {
+  const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
+  const protoHeader = request.headers.get("x-forwarded-proto");
+  const proto = protoHeader?.split(",")[0]?.trim() || new URL(request.url).protocol.replace(":", "");
+  return host ? `${proto}://${host}` : new URL(request.url).origin;
+}
+
 export async function readJson(request: Request) {
   try {
     return await request.json();
