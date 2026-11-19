@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #172033;
+  --color-ink-soft: #3d4a63;
+  --color-sunset: #ff725e;
+  --color-sunset-deep: #b33b2a;
+  --color-lavender: #e7ddfc;
+  --color-lavender-deep: #4c3d78;
+  --color-paper: #fbf7f4;
+  --color-card: #ffffff;
+  --color-line: #eadfd6;
+  --color-good: #0f6e56;
+  --color-good-bg: #e5f6f0;
+  --color-warn: #8a4b12;
+  --color-warn-bg: #fff1e4;
+  --color-clay: #8c2f39;
+  --color-clay-bg: #fbecee;
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --radius-card: 1.75rem;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(231, 221, 252, 0.85), transparent 26rem),
+    radial-gradient(circle at top right, rgba(255, 114, 94, 0.16), transparent 22rem),
+    var(--color-paper);
+  color: var(--color-ink);
+}
+
+::selection {
+  background: #172033;
+  color: #ffffff;
+}
+
+:focus-visible {
+  outline: 3px solid #b33b2a;
+  outline-offset: 3px;
+}
+
+header :focus-visible {
+  outline-color: #ff725e;
+}
+
+#main {
+  scroll-margin-top: 5.5rem;
+}
+
+.kindle-mark {
+  display: inline-flex;
+  width: 1.85rem;
+  height: 1.85rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #e7ddfc;
+}
+
+.kindle-mark span,
+.kindle-mark span::before,
+.kindle-mark span::after {
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: #172033;
+  display: block;
+}
+
+.kindle-mark span {
+  position: relative;
+}
+
+.kindle-mark span::before,
+.kindle-mark span::after {
+  content: "";
+  position: absolute;
+  top: 0;
+}
+
+.kindle-mark span::before {
+  left: -0.5rem;
+  background: #b33b2a;
+}
+
+.kindle-mark span::after {
+  left: 0.5rem;
+  background: #ff725e;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

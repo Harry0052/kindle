@@ -2,7 +2,25 @@
 
 Working name: **Kindle**. This is not the Amazon product and does not use that branding. The build brief called the product GATHER. The owner renamed it Kindle.
 
-Current stage: **0 — plan accepted by the owner in the build request. Implementation has not started.**
+Current stage: **1 — profile foundation is in place. Friend plans are not built yet.**
+
+## Stage 1 report
+
+```text
+PRODUCT: Kindle (brief name GATHER)
+STAGE: 1
+STATUS: PASS
+USER-FACING WORKING FLOWS: A visitor can save a display name, IANA timezone, and an 18+ attestation. Refresh keeps the profile. Log out clears the session. A too-short name stays on the form with an error and does not create a profile. Tonight shows an empty state and says Kindle does not invent nearby people. The example poster is labeled and has no join action.
+UI/UX: Landing and Tonight inspected by Playwright at 390px and 1440px. Neither width overflowed horizontally. Skip link, visible focus ring, labeled fields, and field errors are in the shell. Contrast uses ink on sunset and white on #B33B2A for the main action, because white on #FF725E is below WCAG AA.
+DATA + SECURITY: SQLite tables users, sessions, security_events, rate_buckets. Session cookie is httpOnly and stores a random token; the database stores the SHA-256 hash. Profile writes require a same-origin request and a rate limit. Demo Jordan is seeded as kind=demo and is not a session. Age attestation is stored as a statement, not a verification.
+TESTS: npm test -> 12 passed. npm run lint -> pass. npm run typecheck -> pass. npm run build -> pass. CI=true npm run test:e2e -> 4 passed after fixing a strict-mode locator (the first run failed the assertion, not the save).
+REAL INTEGRATIONS: local SQLite | SANDBOX: none | DISABLED: contacts, GPS, maps, venues, email, SMS, push, identity verification, payments
+FILES CHANGED: Next.js app, design tokens, profile session, CI workflow, foundation Playwright spec.
+OPEN BUGS/RISKS: Plans, friends, and RSVP are not available yet, so the signed-in nav only shows Tonight. No CSP hashes. SQLite is single-server.
+NEXT STAGE PROPOSAL: Interests, home area, friend invite links, and friends-only draft or published activities that a stranger cannot open.
+AWAITING APPROVAL: NO — the owner pre-approved every stage for this build.
+```
+
 
 The repository began as an empty private GitHub repo with a one-line README. There was no application code, database, or CI. Sibling apps `ripple`, `bond`, and `rewind` use the same local stack. Kindle follows that stack.
 
