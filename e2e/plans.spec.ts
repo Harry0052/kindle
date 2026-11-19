@@ -46,7 +46,7 @@ test("a stranger cannot see a friends-only plan, and a friend cannot see the exa
   await strangerPage.goto(inviteUrl);
   await strangerPage.getByRole("button", { name: "Accept friend request" }).click();
   await expect(strangerPage.getByRole("heading", { name: "Friends" })).toBeVisible();
-  await expect(strangerPage.getByText("Avery Chen")).toBeVisible();
+  await expect(strangerPage.getByRole("button", { name: "Block Avery Chen" })).toBeVisible();
   await strangerPage.goto(planUrl);
   await expect(strangerPage.getByRole("heading", { name: "Basketball tonight" })).toBeVisible();
   await expect(strangerPage.getByText("Riverside courts")).toBeVisible();
@@ -54,5 +54,10 @@ test("a stranger cannot see a friends-only plan, and a friend cannot see the exa
   await expect(strangerPage.getByText(/Exact spot hidden|Hidden until you are in/i)).toBeVisible();
   await strangerPage.getByRole("button", { name: "I'm in" }).click();
   await expect(strangerPage.getByText("North gate, court 2")).toBeVisible();
+  await strangerPage.getByLabel("Comment").fill("See you at the gate.");
+  await strangerPage.getByRole("button", { name: "Post update" }).click();
+  await expect(strangerPage.getByText("See you at the gate.")).toBeVisible();
+  await strangerPage.reload();
+  await expect(strangerPage.getByText("See you at the gate.")).toBeVisible();
   await stranger.close();
 });

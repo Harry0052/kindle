@@ -1,10 +1,13 @@
 import { notFound, redirect } from "next/navigation";
+import { CommentForm, TimeForm } from "@/components/product/plan-updates";
+import { BlockButton, CancelPlan, LeaveButton, ReportForm, ReuseForm } from "@/components/product/safety-actions";
 import { PublishButton } from "@/components/product/publish-button";
 import { RsvpControls } from "@/components/product/rsvp-controls";
 import { Badge } from "@/components/ui/badge";
 import { readSessionUser } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
 import { getPlan } from "@/lib/plans/service";
+import { listMessages } from "@/lib/plans/updates";
 
 export const metadata = { title: "Plan" };
 
@@ -15,6 +18,8 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const plan = getPlan(db, user, id);
   if (!plan) notFound();
+  const messages = listMessages(db, user, id) ?? [];
+  const canComment = plan.viewerStatus === "host" || plan.viewerStatus === "going";
 
   return (
     <main id="main" className="mx-auto grid w-full max-w-3xl gap-6 px-4 py-6 md:px-8 md:py-10">
@@ -44,6 +49,30 @@ export default async function PlanPage({ params }: { params: Promise<{ id: strin
             )}
           </section>
           {plan.viewerIsHost && plan.status === "draft" ? <PublishButton activityId={plan.id} /> : null}
+          {plan.viewerIsHost && plan.status === "published" ? <TimeForm activityId={plan.id} /> : null}
+          <section className="grid gap-3" aria-label="Updates">
+            <h2 className="font-display text-3xl">Updates</h2>
+            {messages.length === 0 ? <p className="text-sm text-ink-soft">No updates yet.</p> : null}
+            <ul className="grid gap-2">
+              {messages.map((message) => (
+                <li key={message.id} className="rounded-2xl bg-paper px-4 py-3">
+                  <p className="text-sm font-bold">{message.kind === "system" ? "Update" : message.authorName}</p>
+                  <p>{message.body}</p>
+                </li>
+              ))}
+            </ul>
+            {canComment && plan.status === "published" ? <CommentForm activityId={plan.id} /> : null}
+            <div className="grid gap-4 border-t border-line pt-4">
+              {plan.viewerIsHost ? <CancelPlan activityId={plan.id} /> : null}
+              {plan.viewerIsHost ? <ReuseForm activityId={plan.id} /> : null}
+              {!plan.viewerIsHost && plan.status === "published" ? <LeaveButton activityId={plan.id} /> : null}
+              {!plan.viewerIsHost ? <BlockButton userId={plan.hostId} label={plan.hostName} /> : null}
+              <ReportForm subjectType="activity" subjectId={plan.id} />
+            </div>
+            {!canComment && plan.status === "published" ? (
+              <p className="text-sm text-ink-soft">Comments stay with people who are in. The waitlist can see time updates only.</p>
+            ) : null}
+          </section>
         </div>
       </article>
     </main>

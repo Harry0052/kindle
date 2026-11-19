@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { InvitePanel } from "@/components/product/invite-panel";
+import { BlockButton } from "@/components/product/safety-actions";
 import { EmptyState } from "@/components/ui/empty-state";
 import { readSessionUser } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
@@ -25,8 +26,9 @@ export default async function FriendsPage() {
       ) : (
         <ul className="grid gap-2">
           {friends.map((friend) => (
-            <li key={friend.id} className="flex min-h-14 items-center rounded-2xl bg-white px-4 font-semibold">
-              {friend.displayName}
+            <li key={friend.id} className="grid gap-3 rounded-2xl bg-white px-4 py-3 sm:grid-cols-[1fr_auto] sm:items-center">
+              <span className="font-semibold">{friend.displayName}</span>
+              <BlockButton userId={friend.id} label={friend.displayName} />
             </li>
           ))}
         </ul>

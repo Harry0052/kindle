@@ -2,7 +2,59 @@
 
 Working name: **Kindle**. This is not the Amazon product and does not use that branding. The build brief called the product GATHER. The owner renamed it Kindle.
 
-Current stage: **3 — RSVP, capacity, and exact-spot reveal work. Plan comments and safety tools are next.**
+Current stage: **6 — local release candidate. Not a production or compliance claim.**
+
+## Stage 6 report
+
+```text
+PRODUCT: Kindle (brief name GATHER)
+STAGE: 6
+STATUS: PASS
+USER-FACING WORKING FLOWS: The full local loop works: profile, friend link, private plan, RSVP with capacity and waitlist, exact spot after I'm in, comments, time change, cancel, reuse as a draft, block, report, leave, JSON download, and delete. Delete cancels hosted plans and clears exact spots.
+UI/UX: Screenshots in docs/screenshots for landing at 390 and 1440, Tonight at 390, a published plan at 1440, and Friends at 390. Mobile nav is a solid bar. Playwright also checks that 390 and 1440 landing widths do not overflow.
+DATA + SECURITY: Export and delete are same-origin and rate-limited. Delete removes the session, friend edges, blocks, and interests, and rewrites the name to Deleted member. serverSnapshot counts real rows and is not shown as public traction. A hidden plan still can be HTTP 200 while the body is the not-found screen and omits the plan. No CSP hash list. SQLite is one file.
+TESTS: npm test -> 23 passed. npm run lint -> pass. npm run typecheck -> pass. npm run build -> pass. CI=true npx playwright test --retries=0 -> 6 passed after the final screenshot assertion fix.
+REAL INTEGRATIONS: local SQLite and in-app invite links | SANDBOX: none | DISABLED: contacts, GPS, maps, venues, email, SMS, push, identity verification, payments, moderation delivery
+FILES CHANGED: account export/delete, metrics, runbook, pilot plan, README, screenshots.
+OPEN BUGS/RISKS: Hidden-plan HTTP status can be 200. No pilot has been run, so the ship decision is not ready to call. Single-server SQLite. Reports are stored and not reviewed.
+NEXT STAGE PROPOSAL: None in this build. A real 10–30 person pilot is the next product decision, not more UI.
+AWAITING APPROVAL: NO — the owner asked for the build to be finished on main.
+```
+
+## Stage 5 report
+
+```text
+PRODUCT: Kindle (brief name GATHER)
+STAGE: 5
+STATUS: PASS
+USER-FACING WORKING FLOWS: Block removes a person's view of your plans immediately, frees a spot they held, and stops a new friend link. Leave, cancel, and "plan this again" work. Cancel marks RSVPs cancelled and hides the exact spot from guests. A copied plan is a draft with no guest list. Reports are saved with an on-screen statement that nobody is notified. The privacy page explains these limits.
+UI/UX: Block and cancel ask for a confirm step. Friends and plan pages show the controls. Privacy is linked from the footer.
+DATA + SECURITY: blocks and reports tables. Visibility checks blocks before friendship. Cancellation is transactional with the RSVP update. Reports do not call an outside service.
+TESTS: src/lib/plans/safety.test.ts passed inside npm test (23 passed overall).
+REAL INTEGRATIONS: local SQLite | SANDBOX: none | DISABLED: moderation delivery, email, SMS, push, maps, contacts
+FILES CHANGED: safety service, block/report/leave/cancel/duplicate routes, privacy page.
+OPEN BUGS/RISKS: A report does not start a review. Blocking is immediate only on this server.
+NEXT STAGE PROPOSAL: Export, delete, deployment notes, and an honest pilot plan.
+AWAITING APPROVAL: NO
+```
+
+## Stage 4 report
+
+```text
+PRODUCT: Kindle (brief name GATHER)
+STAGE: 4
+STATUS: PASS
+USER-FACING WORKING FLOWS: The host can change the time. People who are in or waiting get an in-app notice. Kindle does not text or email them. Comments are limited to the host and people who are in. A past start time leaves Tonight and stays on My Plans. The same UTC instant renders differently in Chicago and New York.
+UI/UX: Plan page has the time field, updates list, and comment box. Playwright posts a comment and sees it after refresh.
+DATA + SECURITY: activity_messages and notifications. Waitlist can read system updates and not comments. Time is stored in UTC.
+TESTS: src/lib/plans/updates.test.ts passed inside npm test. Playwright plans spec includes the comment refresh.
+REAL INTEGRATIONS: in-app notices | SANDBOX: none | DISABLED: email, SMS, push
+FILES CHANGED: updates service, time and message routes, plan and Plans pages, migration 0004.
+OPEN BUGS/RISKS: Notices are not pushed anywhere. A spot opening does not auto-promote the waitlist.
+NEXT STAGE PROPOSAL: Block, report, leave, cancel, and reuse.
+AWAITING APPROVAL: NO
+```
+
 
 ## Stage 3 report
 

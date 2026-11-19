@@ -6,7 +6,7 @@ import type { KindleDb } from "@/lib/db/client";
 import { activities, rsvps, users } from "@/lib/db/schema";
 import { CLAIM_SQL, RELEASE_SQL } from "@/lib/plans/capacity";
 import type Database from "better-sqlite3";
-import { areFriends } from "@/lib/friends/service";
+import { areFriends, isBlocked } from "@/lib/friends/service";
 import { formatInZone, formatTimeInZone, nowIso, zonedLocalToUtc } from "@/lib/time";
 import { activitySchema, type ActivityInput, type Category } from "@/lib/validators/activity";
 import { profileReady } from "@/lib/validators/profile";
@@ -59,7 +59,7 @@ function present(
     .where(and(eq(rsvps.activityId, row.id), eq(rsvps.userId, viewer.id)))
     .get();
   const status = viewerStatusFor(row, viewer.id, mine?.status ?? null);
-  const reveal = status === "host" || status === "going";
+  const reveal = status === "host" || (status === "going" && row.status === "published");
   const going = db.select().from(rsvps).where(and(eq(rsvps.activityId, row.id), eq(rsvps.status, "going"))).all();
   const names = going
     .map((rsvp) => db.select().from(users).where(eq(users.id, rsvp.userId)).get()?.displayName)
@@ -110,6 +110,7 @@ function seatHost(db: KindleDb, activityId: string, hostId: string, now: string)
 export function canSeeActivity(db: KindleDb, viewer: PublicUser, row: typeof activities.$inferSelect) {
   if (row.demo === 1 && viewer.kind !== "demo") return false;
   if (viewer.kind === "deleted") return false;
+  if (isBlocked(db, viewer.id, row.hostId)) return false;
   if (row.hostId === viewer.id) return true;
   if (row.status === "draft") return false;
   return areFriends(db, viewer.id, row.hostId);
@@ -211,6 +212,22 @@ export function listHosted(db: KindleDb, viewer: PublicUser) {
     .all()
     .sort((a, b) => a.startsAt.localeCompare(b.startsAt))
     .map((row) => present(db, row, viewer.displayName, viewer));
+}
+
+export function listAttending(db: KindleDb, viewer: PublicUser) {
+  const ids = db
+    .select()
+    .from(rsvps)
+    .where(eq(rsvps.userId, viewer.id))
+    .all()
+    .filter((row) => row.status === "going" || row.status === "waitlist")
+    .map((row) => row.activityId);
+  return db
+    .select()
+    .from(activities)
+    .all()
+    .filter((row) => ids.includes(row.id) && row.hostId !== viewer.id && canSeeActivity(db, viewer, row))
+    .map((row) => present(db, row, hostName(db, row.hostId), viewer));
 }
 
 export function respondToPlan(db: KindleDb, viewer: PublicUser, activityId: string, intent: "going" | "declined") {

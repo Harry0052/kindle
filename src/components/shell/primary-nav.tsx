@@ -41,7 +41,7 @@ export function PrimaryNav({ items, variant }: { items: NavItem[]; variant: "des
   }
 
   return (
-    <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper/95 backdrop-blur md:hidden">
+    <nav aria-label="Primary" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper md:hidden">
       <ul className={`grid ${items.length === 4 ? "grid-cols-4" : items.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
         {items.map((item) => {
           const Icon = icons[item.icon];

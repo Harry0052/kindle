@@ -71,6 +71,7 @@ export const activities = sqliteTable(
     exactLocation: text("exact_location"),
     status: text("status").notNull(),
     demo: integer("demo").notNull().default(0),
+    sourceActivityId: text("source_activity_id"),
     idempotencyKey: text("idempotency_key"),
     goingCount: integer("going_count").notNull().default(0),
     createdAt: text("created_at").notNull(),
@@ -101,6 +102,69 @@ export const rsvps = sqliteTable(
     index("rsvps_activity_idx").on(table.activityId, table.status),
     index("rsvps_user_idx").on(table.userId, table.status),
   ],
+);
+
+export const activityMessages = sqliteTable(
+  "activity_messages",
+  {
+    id: text("id").primaryKey(),
+    activityId: text("activity_id")
+      .notNull()
+      .references(() => activities.id),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    body: text("body").notNull(),
+    kind: text("kind").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [index("activity_messages_idx").on(table.activityId, table.createdAt)],
+);
+
+export const notifications = sqliteTable(
+  "notifications",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    activityId: text("activity_id"),
+    kind: text("kind").notNull(),
+    body: text("body").notNull(),
+    createdAt: text("created_at").notNull(),
+    readAt: text("read_at"),
+  },
+  (table) => [index("notifications_user_idx").on(table.userId, table.createdAt)],
+);
+
+export const blocks = sqliteTable(
+  "blocks",
+  {
+    id: text("id").primaryKey(),
+    blockerId: text("blocker_id")
+      .notNull()
+      .references(() => users.id),
+    blockedId: text("blocked_id")
+      .notNull()
+      .references(() => users.id),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [uniqueIndex("blocks_pair_idx").on(table.blockerId, table.blockedId)],
+);
+
+export const reports = sqliteTable(
+  "reports",
+  {
+    id: text("id").primaryKey(),
+    reporterId: text("reporter_id")
+      .notNull()
+      .references(() => users.id),
+    subjectType: text("subject_type").notNull(),
+    subjectId: text("subject_id").notNull(),
+    reason: text("reason").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [index("reports_reporter_idx").on(table.reporterId, table.createdAt)],
 );
 
 export const sessions = sqliteTable(

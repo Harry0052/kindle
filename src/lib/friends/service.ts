@@ -3,7 +3,7 @@ import { and, eq, gt, or } from "drizzle-orm";
 import { hashToken } from "@/lib/auth/users";
 import { recordEvent } from "@/lib/audit";
 import type { KindleDb } from "@/lib/db/client";
-import { friendEdges, friendInvites, users } from "@/lib/db/schema";
+import { blocks, friendEdges, friendInvites, users } from "@/lib/db/schema";
 import { nowIso } from "@/lib/time";
 
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000;
@@ -23,7 +23,23 @@ export function findEdge(db: KindleDb, a: string, b: string) {
 
 export function areFriends(db: KindleDb, a: string, b: string) {
   if (a === b) return false;
+  if (isBlocked(db, a, b)) return false;
   return findEdge(db, a, b)?.status === "accepted";
+}
+
+export function isBlocked(db: KindleDb, a: string, b: string) {
+  if (a === b) return false;
+  const row = db
+    .select()
+    .from(blocks)
+    .where(
+      or(
+        and(eq(blocks.blockerId, a), eq(blocks.blockedId, b)),
+        and(eq(blocks.blockerId, b), eq(blocks.blockedId, a)),
+      ),
+    )
+    .get();
+  return Boolean(row);
 }
 
 export function createFriendInvite(db: KindleDb, inviterId: string) {
@@ -61,6 +77,9 @@ export function acceptInvite(db: KindleDb, userId: string, token: string) {
   const preview = previewInvite(db, token);
   if (!preview) return { ok: false as const, message: "That friend link is expired or unknown." };
   if (preview.inviterId === userId) return { ok: false as const, message: "That is your own friend link." };
+  if (isBlocked(db, userId, preview.inviterId)) {
+    return { ok: false as const, message: "That friend link cannot be used." };
+  }
   if (preview.demo) return { ok: false as const, message: "Demo profiles cannot be added as friends." };
   const existing = findEdge(db, userId, preview.inviterId);
   const now = nowIso();
@@ -107,7 +126,7 @@ export function listFriends(db: KindleDb, userId: string): FriendRow[] {
   if (ids.length === 0) return [];
   const people = db.select().from(users).all();
   return people
-    .filter((person) => ids.includes(person.id) && person.kind !== "deleted")
+    .filter((person) => ids.includes(person.id) && person.kind !== "deleted" && !isBlocked(db, userId, person.id))
     .map((person) => ({ id: person.id, displayName: person.displayName }))
     .sort((a, b) => a.displayName.localeCompare(b.displayName));
 }
